@@ -64,9 +64,11 @@ flutter run
 ## Menjalankan Backend Server
 ### 1. Install
 <b>Database</b>
-- Install postgres Database 
-- Setup username (default: postgres), password, and PORT (default: 5432)
-- Pastikan server database aktif <br>
+<ul>
+<li>Install postgres Database </li> 
+<li>Setup username (default: postgres), password, and PORT (default: 5432)</li>
+<li>Pastikan server database aktif</li>
+</ul>
 <b> SQL Migration Helper </b>
 ```text
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
@@ -75,9 +77,11 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 
 ### 2. Environment Variable
 Pastikan environtment variable yg diperlukan sudah tersedia:
-- `PORT`
-- `DB_URL` 
-- `JWT_KEY` <br>
+<ul>
+<li>`PORT`</li> 
+<li>`DB_URL`</li>
+<li>`JWT_KEY`</li>
+</ul>
 lihat di `backend/.env_example`
 
 ### 3. Database migration
