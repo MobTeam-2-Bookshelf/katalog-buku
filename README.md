@@ -66,7 +66,7 @@ flutter run
 <b>Database</b>
 - Install postgres Database 
 - Setup username (default: postgres), password, and PORT (default: 5432)
-- Pastikan server database aktif
+- Pastikan server database aktif <br>
 <b> SQL Migration Helper </b>
 ```text
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
