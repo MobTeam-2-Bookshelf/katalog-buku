@@ -30,6 +30,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<void> _checkUserTokenAndNavigateToHome() async {
+    bool isLoggedIn = await AuthService.isLoggedIn();
+  }
+
   /// Handler tombol "Masuk" — panggil API login + simpan JWT.
   Future<void> _handleLogin() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -38,10 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final username = _usernameController.text.trim();
-      final token = await _apiService.login(
-        username,
-        _passwordController.text,
-      );
+      final token = await _apiService.login(username, _passwordController.text);
 
       // Simpan session JWT + username
       await AuthService.saveSession(token, username);
@@ -52,10 +53,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePage(
-            username: username,
-            token: token,
-          ),
+          builder: (_) => HomePage(username: username, token: token),
         ),
       );
     } catch (e) {
@@ -88,8 +86,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _navigateToHomePage() {}
+
   @override
   Widget build(BuildContext context) {
+    _handleLogin();
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
