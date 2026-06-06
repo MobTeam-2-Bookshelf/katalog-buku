@@ -25,7 +25,6 @@ Proyek ini merupakan aplikasi manajemen koleksi buku pribadi, pelacakan progres 
 ---
 
 ## Struktur Direktori Proyek (Monorepo)
-
 Untuk menjaga modularitas, repositori ini menggunakan arsitektur monorepo yang memisahkan kode aplikasi mobile dengan server backend:
 
 ```text
@@ -53,11 +52,18 @@ https://mobteam-2-bookshelf.github.io/katalog-buku/
 
 --- 
 
+### Install Aplikasi
+
+...
+
+---
+
 ## Menjalankan Aplikasi dengan Flutter
 ```text
 flutter pub get
 flutter run
 ```
+Note: Jika ingin menggunakan REST API yang dijalankan secara lokal, ganti `_baseUrl` pada file `apps\mobile\lib\services\api_service.dart`. Misal `_baseUrl = 'localhost/api/v1`
 
 --- 
 
