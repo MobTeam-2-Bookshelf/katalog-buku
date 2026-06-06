@@ -1,14 +1,14 @@
-# Aplikasi Katalog Buku dan Reading Tracker
+# Bookshelf — Reading Tracker and Book Catalogue Application
 
-# MobTeam #2 — Aplikasi Katalog Buku & Reading Tracker
+Bookshelf merupakan aplikasi pengelola koleksi buku pengguna secara privat. Bookshelf dirancang untuk mencatat dan merekap daftar buku yang telah dibaca oleh pengguna dalam jangka waktu tertentu. Di samping itu, Bookshelf juga mampu merekap progres pembacaan buku serta memberi rating-review pada buku yang telah dibaca. Data tersimpan lokal di IsarDB kemudian dapat disinkronkan ke backend agar koleksi buku bisa diakses dari mana saja. Bookshelf berbasis Mobile yang mendukung fungsionalitas secara luring memakai IsarDB dengan sinkronisasi data ke *cloud server* ketika user daring kembali.
 
-Proyek ini merupakan aplikasi manajemen koleksi buku pribadi, pelacakan progres membaca, dan pemberian ulasan berbasis Mobile yang mendukung fungsionalitas penuh secara *offline* dengan sinkronisasi data ke *cloud server*.
+Project ini dibuat untuk tugas MobTeam #2 — Backend & Local Database dengan studi kasus Aplikasi Katalog Buku & Reading Tracker.
 
 ---
 
-## Anggota Tim 2
-* **Marcelino Budi Prakasya**: bertanggung jawab pada pengembangan **Back-end API & Server Database**.
-* **Mikail Achmad**: bertanggung jawab pada pengembangan **Front-end Mobile Application & Local Database**.
+## Anggota dan pembagian tugas Tim 2
+[Mikail Achmad] (Mobile Developer & Integrator): Bertanggung jawab membangun antarmuka (UI) aplikasi dengan Flutter, mengimplementasikan database lokal (IsarDB) untuk mode offline-first, menyusun logika sinkronisasi data yang robust dengan API, dan mengatasi konfigurasi build APK Android.
+[Marcelino Budi Prakasya] (Backend Developer): Bertanggung jawab merancang dan membuat REST API menggunakan Golang, mengelola basis data PostgreSQL, menangani konversi tipe data dari JSON ke DB format, serta melakukan deployment server API ke VPS Linux.
 
 ---
 
@@ -24,27 +24,60 @@ Proyek ini merupakan aplikasi manajemen koleksi buku pribadi, pelacakan progres 
 
 ---
 
+## Fitur Utama Bookshelf
+**Frontend Mobile (Aplikasi):**
+- Autentikasi pengguna (Login & Register).
+- Manajemen data buku (Create, Read, Update, Delete).
+- Mode *Offline-First* (Bisa digunakan tanpa internet).
+- Fitur sinkronisasi data 2 arah (Lokal ke Server & Server ke Lokal).
+- Fitur *Scan Barcode/QR Code*.
+**Backend API (Server):**
+- RESTful API terpusat untuk melayani HTTP Request.
+- Autentikasi keamanan berbasis Token JWT.
+- Penerimaan operasi data jamak (*bulk actions*) via `HTTP POST`.
+
 ## Struktur Direktori Proyek (Monorepo)
 Untuk menjaga modularitas, repositori ini menggunakan arsitektur monorepo yang memisahkan kode aplikasi mobile dengan server backend:
 
 ```text
-Aplikasi Katalog Buku & Reading Tracker/
-├── backend/                  # Workspace Marcel (Flask API)
-│   ├── internal/             # Kode berisi logika, autentikasi, database, dan lain-lain.
-│   ├── sql/                  # Skema dan migrasi DDL PostgreSQL
-│   └── main.go               # Script utama server Go
+katalog-buku/
+├── backend/                 # Workspace Marcel (Flask API)
+│   ├── internal/            # Kode berisi logika, autentikasi, database, dan lain-lain.
+│   ├── sql/                 # Skema dan migrasi DDL PostgreSQL
+│   └── main.go              # Script utama server Go
+│   └── sqlc.yaml            # Konfigurasi ORM/Database
 │
-├── lib/                      # Workspace Miko (Flutter Application)
-│   ├── models/               # Definisi skema objek IsarDB
-│   ├── views/                # Komponen antarmuka (UI Pages & Widgets)
-│   ├── services/             # Handler integrasi HTTP / API (Dio)
-│   └── main.dart             # Entry point aplikasi Flutter
-│
-├── pubspec.yaml              # Konfigurasi package Flutter
+├── apps/mobile/            # Area pengembangan frontend aplikasi mobile
+│   ├── lib/                # Source code Dart (Views, Models, Services)
+│   ├── ├── models/         # Definisi skema objek IsarDB
+│   ├── ├── views/          # Komponen antarmuka (UI Pages & Widgets)
+│   ├── ├── services/       # Handler integrasi HTTP / API (Dio)
+│   └── ├── main.dart       # Entry point aplikasi Flutter
+│   ├── android/            # Konfigurasi platform Android & Gradle
+│   └── pubspec.yaml        # Daftar dependency Flutter (Isar, http, dll)
 └── README.md                 # Dokumentasi proyek
 ```
 
 --- 
+
+## Preview Aplikasi
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/sign_up_page.jpeg" width="250"><br>
+      <b>Login</b>
+    </td>
+    <td align="center">
+      <img src="docs/book_detail_page.jpeg" width="250"><br>
+      <b>Home</b>
+    </td>
+    <td align="center">
+      <img src="docs/book_list_page.jpeg" width="250"><br>
+      <b>Transactions</b>
+    </td>
+  </tr>
+</table>
 
 ## Dokumentasi API
 
@@ -52,7 +85,7 @@ https://mobteam-2-bookshelf.github.io/katalog-buku/
 
 --- 
 
-### Install Aplikasi
+### Pemasangan Aplikasi
 
 Ikuti langkah-langkah berikut untuk menginstal aplikasi **Bookshelf** pada perangkat Android:
 
@@ -118,3 +151,14 @@ cd /backend
 go build 
 ./bookshelf
 ```
+
+## Alur Demo yang Disarankan
+1. Autentikasi: Buka aplikasi dan lakukan Login (atau Register akun baru)
+2. Kondisi Online: Tambahkan 1-2 buku baru dan pastikan data muncul di Beranda.
+3. Kondisi Offline: Matikan koneksi internet HP (Airplane Mode).
+4. Manipulasi Offline: Tambahkan 1 buku baru lagi, edit 1 buku lama, dan hapus 1 buku lainnya tanpa koneksi internet. Tunjukkan bahwa UI tetap merespons dengan cepat.
+5. Kondisi Online: Nyalakan kembali internet.
+6. Eksekusi Sinkronisasi: Buka halaman Profile dan tekan tombol "Sinkronisasi". Tunjukkan bahwa tidak ada data loss dan semua perubahan offline sukses terkirim ke server API.
+
+## Status Akhir Project Saat Ini
+Aplikasi Bookshelf telah berhasil dibangun menjadi format .apk akhir dengan kapabilitas Offline-First yang stabil dan bebas crash. Backend API telah aktif di-deploy ke VPS dan melayani permintaan sinkronisasi data antar client-server secara presisi.
