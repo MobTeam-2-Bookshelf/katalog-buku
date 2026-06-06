@@ -7,8 +7,8 @@ Project ini dibuat untuk tugas MobTeam #2 — Backend & Local Database dengan st
 ---
 
 ## Anggota dan pembagian tugas Tim 2
-[Mikail Achmad] (Mobile Developer & Integrator): Bertanggung jawab membangun antarmuka (UI) aplikasi dengan Flutter, mengimplementasikan database lokal (IsarDB) untuk mode offline-first, menyusun logika sinkronisasi data yang robust dengan API, dan mengatasi konfigurasi build APK Android.
-[Marcelino Budi Prakasya] (Backend Developer): Bertanggung jawab merancang dan membuat REST API menggunakan Golang, mengelola basis data PostgreSQL, menangani konversi tipe data dari JSON ke DB format, serta melakukan deployment server API ke VPS Linux.
+1. Mikail Achmad (Mobile Developer & Integrator): Bertanggung jawab membangun antarmuka (UI) aplikasi dengan Flutter, mengimplementasikan database lokal (IsarDB) untuk mode offline-first, menyusun logika sinkronisasi data yang robust dengan API, dan mengatasi konfigurasi build APK Android.
+2. Marcelino Budi Prakasya (Backend Developer): Bertanggung jawab merancang dan membuat REST API menggunakan Golang, mengelola basis data PostgreSQL, menangani konversi tipe data dari JSON ke DB format, serta melakukan deployment server API ke VPS Linux.
 
 ---
 
@@ -66,15 +66,15 @@ katalog-buku/
   <tr>
     <td align="center">
       <img src="docs/sign_up_page.jpeg" width="250"><br>
-      <b>Login</b>
+      <b>Sign Up</b>
     </td>
     <td align="center">
       <img src="docs/book_detail_page.jpeg" width="250"><br>
-      <b>Home</b>
+      <b>Book Detail</b>
     </td>
     <td align="center">
       <img src="docs/book_list_page.jpeg" width="250"><br>
-      <b>Transactions</b>
+      <b>Book List</b>
     </td>
   </tr>
 </table>
@@ -96,9 +96,6 @@ Ikuti langkah-langkah berikut untuk menginstal aplikasi **Bookshelf** pada peran
 5. Aplikasi **Bookshelf** siap digunakan.
 
 > **Catatan:** Jika muncul peringatan keamanan saat instalasi, aktifkan izin **Install from Unknown Sources** sesuai pengaturan perangkat Android yang digunakan.
-
-
-...
 
 ---
 
