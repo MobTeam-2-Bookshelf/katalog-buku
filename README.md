@@ -54,6 +54,17 @@ https://mobteam-2-bookshelf.github.io/katalog-buku/
 
 ### Install Aplikasi
 
+Ikuti langkah-langkah berikut untuk menginstal aplikasi **Bookshelf** pada perangkat Android:
+
+1. Unduh atau salin file **`app-arm64-v8a-release.apk`** ke perangkat Anda.
+2. Buka file **`app-arm64-v8a-release.apk`** melalui File Manager.
+3. Tekan tombol **Install** dan tunggu hingga proses instalasi selesai.
+4. Setelah instalasi berhasil, tekan tombol **Open** atau buka aplikasi melalui ikon **Bookshelf** pada layar utama perangkat.
+5. Aplikasi **Bookshelf** siap digunakan.
+
+> **Catatan:** Jika muncul peringatan keamanan saat instalasi, aktifkan izin **Install from Unknown Sources** sesuai pengaturan perangkat Android yang digunakan.
+
+
 ...
 
 ---
