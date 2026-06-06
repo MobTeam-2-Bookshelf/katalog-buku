@@ -5,7 +5,8 @@ import 'package:bookshelf/models/book.dart';
 /// Service untuk komunikasi dengan backend API.
 /// Base URL: http://103.23.198.215/api/v1
 class ApiService {
-  static const String _baseUrl = 'http://localhost/api/v1';
+  static const String _baseUrl = 'http://103.23.198.215/api/v1';
+  // static const String _baseUrl = 'http://localhost/api/v1';
 
   final Dio _dio;
 
@@ -33,9 +34,10 @@ class ApiService {
       );
 
       debugPrint('=== RESPONSE LOGIN ===');
-      debugPrint(
-        response.data.toString(),
-      ); // Ini cara melihat output API sukses
+      // WARNING: Perintah dibawah menampilkan token user
+      // debugPrint(
+      //   response.data.toString(),
+      // ); // Ini cara melihat output API sukses
       return response.data['token'] as String;
     } on DioException catch (e) {
       debugPrint('=== ERROR LOGIN ===');
