@@ -31,6 +31,7 @@ Project ini dibuat untuk tugas MobTeam #2 — Backend & Local Database dengan st
 - Mode *Offline-First* (Bisa digunakan tanpa internet).
 - Fitur sinkronisasi data 2 arah (Lokal ke Server & Server ke Lokal).
 - Fitur *Scan Barcode/QR Code*.
+
 **Backend API (Server):**
 - RESTful API terpusat untuk melayani HTTP Request.
 - Autentikasi keamanan berbasis Token JWT.
