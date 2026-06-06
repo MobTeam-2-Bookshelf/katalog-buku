@@ -79,10 +79,10 @@ katalog-buku/
   </tr>
 </table>
 
-## Dokumentasi API
-
-https://mobteam-2-bookshelf.github.io/katalog-buku/
-
+## Links
+- Endpoint Bookshelf:http://103.23.198.215/api/v1
+- Dokumentasi API: https://mobteam-2-bookshelf.github.io/katalog-buku/
+- Mendapatkan buku acak: https://api.bukuacak.shabsolute.tech/api/v1/random_book
 --- 
 
 ### Pemasangan Aplikasi
