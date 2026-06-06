@@ -64,6 +64,7 @@ flutter pub get
 flutter run
 ```
 Note: Jika ingin menggunakan REST API yang dijalankan secara lokal, ganti `base_url` pada file `apps\mobile\lib\services\api_service.dart`
+
 --- 
 
 ## Menjalankan Backend Server
