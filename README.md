@@ -50,3 +50,54 @@ Aplikasi Katalog Buku & Reading Tracker/
 ## Dokumentasi API
 
 https://mobteam-2-bookshelf.github.io/katalog-buku/
+
+--- 
+
+## Menjalankan Aplikasi dengan Flutter
+```text
+flutter pub get
+flutter run
+```
+
+--- 
+
+## Menjalankan Backend Server
+### 1. Install
+<b>Database</b>
+<ul>
+<li>Install postgres Database </li> 
+<li>Setup username (default: postgres), password, and PORT (default: 5432)</li>
+<li>Pastikan server database aktif</li>
+</ul>
+<b> SQL Migration Helper </b>
+
+```text
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+go install github.com/pressly/goose/v3/cmd/goose@latest
+```
+
+### 2. Environment Variable
+Pastikan environtment variable yg diperlukan sudah tersedia:
+<ul>
+<li>`PORT`</li> 
+<li>`DB_URL`</li>
+<li>`JWT_KEY`</li>
+</ul>
+lihat di `backend/.env_example`
+
+### 3. Database migration
+```
+cd /backend/sql/schema
+goose postgres "user=<db-user> password=<your-password> host=<url> port=5432 dbname=bookshelf sslmode=disable" up
+```
+### 4. Parse SQL into type-safe and idiomatic code (Optional)
+```
+cd /backend
+sqlc generate
+```
+### 5. 5. Build and Run Go server
+```
+cd /backend 
+go build 
+./bookshelf
+```
