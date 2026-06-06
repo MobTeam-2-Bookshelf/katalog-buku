@@ -63,7 +63,7 @@ https://mobteam-2-bookshelf.github.io/katalog-buku/
 flutter pub get
 flutter run
 ```
-Note: Jika ingin menggunakan REST API yang dijalankan secara lokal, ganti `base_url` pada file `apps\mobile\lib\services\api_service.dart`
+Note: Jika ingin menggunakan REST API yang dijalankan secara lokal, ganti `_baseUrl` pada file `apps\mobile\lib\services\api_service.dart`. Misal `_baseUrl = 'localhost/api/v1`
 
 --- 
 
