@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:bookshelf/app/theme.dart';
 import 'package:bookshelf/views/auth/register_page.dart';
 import 'package:bookshelf/views/auth/widgets/auth_text_field.dart';
-import 'package:bookshelf/views/home/home_page.dart';
 import 'package:bookshelf/services/api_service.dart';
 import 'package:bookshelf/services/auth_service.dart';
+import 'package:bookshelf/services/isar_db_service.dart';
+import 'package:bookshelf/views/home/home_page.dart';
 
 /// Halaman Login (Selamat Datang).
 class LoginPage extends StatefulWidget {
@@ -45,6 +46,14 @@ class _LoginPageState extends State<LoginPage> {
 
       // Simpan session JWT + username
       await AuthService.saveSession(token, username);
+
+      // Fetch books dari server & simpan ke IsarDB (Offline caching awal)
+      try {
+        final books = await _apiService.getBooks(token);
+        await IsarDbService().saveBooks(books, username);
+      } catch (_) {
+        // Abaikan jika gagal (bisa diambil nanti di HomePage)
+      }
 
       if (!mounted) return;
 

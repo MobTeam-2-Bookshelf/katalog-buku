@@ -5,7 +5,7 @@ import 'package:bookshelf/main.dart';
 void main() {
   group('BookshelfApp - Smoke Tests', () {
     testWidgets('App renders without error', (WidgetTester tester) async {
-      await tester.pumpWidget(const BookshelfApp());
+      await tester.pumpWidget(const BookshelfApp(isInitSuccess: true, isLoggedIn: false));
       // Verifikasi app berhasil di-render
       expect(find.byType(MaterialApp), findsOneWidget);
     });
@@ -13,7 +13,7 @@ void main() {
     testWidgets('Login page shows correct elements', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const BookshelfApp());
+      await tester.pumpWidget(const BookshelfApp(isInitSuccess: true, isLoggedIn: false));
 
       // Verifikasi elemen-elemen halaman Login
       expect(find.text('Bookshelf'), findsOneWidget);
@@ -26,7 +26,7 @@ void main() {
     testWidgets('Navigate from Login to Register', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const BookshelfApp());
+      await tester.pumpWidget(const BookshelfApp(isInitSuccess: true, isLoggedIn: false));
 
       // Tap link "Daftar" untuk navigasi ke Register
       await tester.tap(find.text('Daftar'));
@@ -40,7 +40,7 @@ void main() {
     testWidgets('Navigate from Register back to Login', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const BookshelfApp());
+      await tester.pumpWidget(const BookshelfApp(isInitSuccess: true, isLoggedIn: false));
 
       // Ke Register dulu
       await tester.tap(find.text('Daftar'));
@@ -57,7 +57,7 @@ void main() {
     testWidgets('Login form validation shows errors on empty fields', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const BookshelfApp());
+      await tester.pumpWidget(const BookshelfApp(isInitSuccess: true, isLoggedIn: false));
 
       // Tap tombol Masuk tanpa mengisi form
       await tester.tap(find.widgetWithText(ElevatedButton, 'Masuk'));

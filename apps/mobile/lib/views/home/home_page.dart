@@ -3,6 +3,7 @@ import 'package:bookshelf/app/theme.dart';
 import 'package:bookshelf/app/constants.dart';
 import 'package:bookshelf/models/book.dart';
 import 'package:bookshelf/services/api_service.dart';
+import 'package:bookshelf/services/isar_db_service.dart';
 import 'package:bookshelf/views/home/widgets/book_search_bar.dart';
 import 'package:bookshelf/views/home/widgets/status_filter_chips.dart';
 import 'package:bookshelf/views/home/widgets/book_card.dart';
@@ -17,8 +18,14 @@ import 'package:bookshelf/views/scanner/scan_barcode_page.dart';
 class HomePage extends StatefulWidget {
   final String username;
   final String token;
+  final String userId;
 
-  const HomePage({super.key, this.username = 'User', required this.token});
+  const HomePage({
+    super.key,
+    this.username = 'User',
+    required this.token,
+    this.userId = '',
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -41,6 +48,7 @@ class _HomePageState extends State<HomePage> {
   String? _error;
 
   final _apiService = ApiService();
+  final _dbService = IsarDbService();
 
   @override
   void initState() {
@@ -48,26 +56,54 @@ class _HomePageState extends State<HomePage> {
     _fetchBooks();
   }
 
-  /// Fetch buku dari API backend.
+  /// Fetch buku — offline-first:
+  /// 1. Load dari IsarDB lokal (instant)
+  /// 2. Fetch dari API di background
+  /// 3. Simpan hasil API ke IsarDB
   Future<void> _fetchBooks() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
+    // 1. Load dari database lokal dulu (instant)
     try {
-      final books = await _apiService.getBooks(widget.token);
+      final localBooks = await _dbService.getAllBooks();
+      if (localBooks.isNotEmpty && mounted) {
+        setState(() {
+          _books = localBooks;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      // Database lokal gagal, lanjut ke API
+    }
+
+    // 2. Fetch dari API di background
+    try {
+      final apiBooks = await _apiService.getBooks(widget.token);
       if (!mounted) return;
+
+      // 3. Simpan ke IsarDB lokal
+      final userId = widget.userId.isNotEmpty ? widget.userId : widget.username;
+      await _dbService.saveBooks(apiBooks, userId);
+
       setState(() {
-        _books = books;
+        _books = apiBooks;
         _isLoading = false;
+        _error = null;
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = 'Gagal memuat buku. Pastikan koneksi internet aktif.';
-        _isLoading = false;
-      });
+      // Jika sudah ada data lokal, jangan tampilkan error
+      if (_books.isEmpty) {
+        setState(() {
+          _error = 'Gagal memuat buku. Pastikan koneksi internet aktif.';
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -123,15 +159,21 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(builder: (_) => const AddBookPage()),
     );
 
-    // Tambahkan buku baru ke list dan sync ke server
+    // Tambahkan buku baru ke list, simpan ke IsarDB, dan sync ke server
     if (result != null) {
       setState(() => _books.add(result));
+
+      // Simpan ke IsarDB lokal dengan status 'add'
+      result.syncAction = 'add';
+      final userId = widget.userId.isNotEmpty ? widget.userId : widget.username;
+      await _dbService.saveBook(result, userId);
 
       // Sync ke server
       try {
         await _apiService.addBooks(widget.token, [result]);
+        await _dbService.markAsSynced(result.id);
       } catch (_) {
-        // Buku sudah ditambahkan lokal, sync nanti via Profile
+        // Buku sudah tersimpan lokal, sync nanti via Profile
       }
     }
   }
@@ -154,6 +196,7 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => BookDetailPage(
           book: book,
           token: widget.token,
+          userId: widget.userId,
         ),
       ),
     );

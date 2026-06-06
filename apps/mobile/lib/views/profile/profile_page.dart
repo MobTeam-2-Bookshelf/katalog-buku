@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bookshelf/app/theme.dart';
 import 'package:bookshelf/services/api_service.dart';
 import 'package:bookshelf/services/auth_service.dart';
+import 'package:bookshelf/services/isar_db_service.dart';
 import 'package:bookshelf/views/auth/login_page.dart';
 
 /// Halaman Profil & Sinkronisasi.
@@ -21,14 +22,39 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isSyncing = false;
   String? _lastSyncTime;
   final _apiService = ApiService();
+  final _dbService = IsarDbService();
 
-  /// Sinkronisasi data ke server (fetch ulang buku dari server).
+  /// Sinkronisasi 2 arah:
+  /// 1. Push buku unsynced dari IsarDB ke server
+  /// 2. Pull buku terbaru dari server ke IsarDB
   Future<void> _handleSync() async {
     setState(() => _isSyncing = true);
 
     try {
-      // Fetch buku dari server untuk memastikan data ter-sync
-      await _apiService.getBooks(widget.token);
+      // 1. Push unsynced books ke server berdasarkan aksinya
+      final unsyncedBooks = await _dbService.getUnsyncedBooks();
+      if (unsyncedBooks.isNotEmpty) {
+        final addBooks = unsyncedBooks.where((b) => b.syncAction == 'add').toList();
+        final editBooks = unsyncedBooks.where((b) => b.syncAction == 'edit').toList();
+        final deleteBooks = unsyncedBooks.where((b) => b.syncAction == 'delete').toList();
+
+        if (addBooks.isNotEmpty) {
+          await _apiService.addBooks(widget.token, addBooks);
+          for (var b in addBooks) { await _dbService.markAsSynced(b.id); }
+        }
+        if (editBooks.isNotEmpty) {
+          await _apiService.editBooks(widget.token, editBooks);
+          for (var b in editBooks) { await _dbService.markAsSynced(b.id); }
+        }
+        if (deleteBooks.isNotEmpty) {
+          await _apiService.deleteBooks(widget.token, deleteBooks.map((b) => b.id).toList());
+          for (var b in deleteBooks) { await _dbService.deleteBook(b.id); }
+        }
+      }
+
+      // 2. Pull dari server dan simpan ke lokal
+      final serverBooks = await _apiService.getBooks(widget.token);
+      await _dbService.saveBooks(serverBooks, widget.username);
 
       if (!mounted) return;
 
@@ -61,9 +87,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Logout — hapus session dan kembali ke LoginPage.
+  /// Logout — hapus session, clear IsarDB, dan kembali ke LoginPage.
   Future<void> _handleLogout() async {
     await AuthService.clearSession();
+    await _dbService.clearAllBooks();
+    await _dbService.clearAllUsers();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,

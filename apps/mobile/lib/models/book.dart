@@ -22,8 +22,8 @@ class Book {
   final String? isbn;
   final String? coverUrl;
 
-  /// Flag sinkronisasi — true jika data sudah ter-sync ke server.
-  bool isSynced;
+  /// Status sync: 'none', 'add', 'edit', 'delete'
+  String syncAction;
 
   DateTime updatedAt;
 
@@ -40,7 +40,7 @@ class Book {
     this.status = ReadingStatus.belumDibaca,
     this.isbn,
     this.coverUrl,
-    this.isSynced = false,
+    this.syncAction = 'none',
     DateTime? updatedAt,
   }) : id = id ?? _uuid.v4(),
        updatedAt = updatedAt ?? DateTime.now();

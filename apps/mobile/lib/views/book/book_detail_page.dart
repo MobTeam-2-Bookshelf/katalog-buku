@@ -3,6 +3,7 @@ import 'package:bookshelf/app/theme.dart';
 import 'package:bookshelf/app/constants.dart';
 import 'package:bookshelf/models/book.dart';
 import 'package:bookshelf/services/api_service.dart';
+import 'package:bookshelf/services/isar_db_service.dart';
 import 'package:bookshelf/views/book/widgets/progress_bottom_sheet.dart';
 import 'package:bookshelf/views/book/rating_review_page.dart';
 import 'package:bookshelf/views/book/add_book_page.dart';
@@ -13,8 +14,14 @@ import 'package:bookshelf/views/book/add_book_page.dart';
 class BookDetailPage extends StatefulWidget {
   final Book book;
   final String token;
+  final String userId;
 
-  const BookDetailPage({super.key, required this.book, required this.token});
+  const BookDetailPage({
+    super.key,
+    required this.book,
+    required this.token,
+    this.userId = '',
+  });
 
   @override
   State<BookDetailPage> createState() => _BookDetailPageState();
@@ -25,6 +32,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late Book _book;
   bool _hasChanges = false;
   final _apiService = ApiService();
+  final _dbService = IsarDbService();
 
   @override
   void initState() {
@@ -95,13 +103,71 @@ class _BookDetailPageState extends State<BookDetailPage> {
     }
   }
 
-  /// Sync perubahan buku ke server.
+  /// Sync perubahan buku ke server + simpan ke IsarDB lokal.
   Future<void> _syncBook() async {
-    try {
-      await _apiService.editBooks(widget.token, [_book]);
-    } catch (_) {
-      // Sync gagal, data lokal sudah ter-update
+    // Simpan ke database lokal dulu
+    final userId = widget.userId.isNotEmpty ? widget.userId : 'local';
+    
+    // Jika belum pernah di-sync (masih 'add'), biarkan 'add' agar backend tau ini buku baru
+    if (_book.syncAction != 'add') {
+      _book.syncAction = 'edit';
     }
+    
+    await _dbService.saveBook(_book, userId);
+
+    // Coba sync ke server langsung
+    try {
+      if (_book.syncAction == 'add') {
+        await _apiService.addBooks(widget.token, [_book]);
+      } else {
+        await _apiService.editBooks(widget.token, [_book]);
+      }
+      _book.syncAction = 'none';
+      await _dbService.markAsSynced(_book.id);
+    } catch (_) {
+      // Sync gagal, data lokal sudah ter-update, sync nanti via Profile
+    }
+  }
+
+  /// Hapus buku
+  Future<void> _deleteBook() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Buku'),
+        content: const Text('Yakin ingin menghapus buku ini dari rak?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // Simpan status delete di lokal
+    _book.syncAction = 'delete';
+    final userId = widget.userId.isNotEmpty ? widget.userId : 'local';
+    await _dbService.saveBook(_book, userId);
+
+    // Coba hapus di server
+    try {
+      await _apiService.deleteBooks(widget.token, [_book.id]);
+      // Jika berhasil di server, baru benar-benar hapus dari lokal
+      await _dbService.deleteBook(_book.id);
+    } catch (_) {
+      // Jika gagal, biarkan di lokal dengan status 'delete' untuk disinkronkan nanti
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context, true); // Kembali dengan flag perubahan true
   }
 
   @override
@@ -123,6 +189,11 @@ class _BookDetailPageState extends State<BookDetailPage> {
             onPressed: () => Navigator.pop(context, _hasChanges),
           ),
           actions: [
+            // Tombol hapus buku
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              onPressed: _deleteBook,
+            ),
             // Tombol edit metadata buku
             IconButton(
               icon: const Icon(Icons.edit_outlined),
