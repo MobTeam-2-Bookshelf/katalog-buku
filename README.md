@@ -143,7 +143,7 @@ goose postgres "user=<db-user> password=<your-password> host=<url> port=5432 dbn
 cd /backend
 sqlc generate
 ```
-### 5. 5. Build and Run Go server
+### 5. Build and Run Go server
 ```
 cd /backend 
 go build 
