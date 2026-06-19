@@ -7,20 +7,45 @@ Project ini dibuat untuk tugas MobTeam #2 — Backend & Local Database dengan st
 ---
 
 ## Anggota dan pembagian tugas Tim 2
-1. Mikail Achmad (Mobile Developer & Integrator): Bertanggung jawab membangun antarmuka (UI) aplikasi dengan Flutter, mengimplementasikan database lokal (IsarDB) untuk mode offline-first, menyusun logika sinkronisasi data yang robust dengan API, dan mengatasi konfigurasi build APK Android.
-2. Marcelino Budi Prakasya (Backend Developer): Bertanggung jawab merancang dan membuat REST API menggunakan Golang, mengelola basis data PostgreSQL, menangani konversi tipe data dari JSON ke DB format, serta melakukan deployment server API ke VPS Linux.
+ 
+### Mikail Achmad (Mobile Developer & Integrator)
+- Membangun antarmuka (UI) aplikasi dengan Flutter.
+- Mengimplementasikan database lokal (IsarDB) untuk mode offline-first.
+- Menyusun logika sinkronisasi data yang robust dengan API.
+- Mengatasi konfigurasi build APK Android.
+
+### Marcelino Budi Prakasya (Backend Developer)
+- Merancang dan membuat REST API menggunakan Golang.
+- Mengelola basis data PostgreSQL.
+- Menangani konversi tipe data dari JSON ke DB format.
+- Melakukan deployment server API ke VPS Linux.
 
 ---
 
 ## Tech Stack Proyek
 
+### Frontend Mobile
+ 
+| Kebutuhan | Teknologi |
+| :--- | :--- |
+| Framework | Flutter |
+| Language | Dart |
+| State Management | `setState` / `StatefulWidget` (built-in Flutter, tanpa package eksternal) |
+| Local Database | IsarDB (`isar`, `isar_flutter_libs`) |
+| Code Generation | `build_runner`, `isar_generator` |
+| HTTP Client | `dio` |
+| Local Storage | `shared_preferences` |
+| Barcode / QR Scanner | `mobile_scanner` |
+| ID Generator | `uuid` |
+| Typography | `google_fonts` |
+| Path Management | `path_provider` |
+ 
+### Backend & Server
+ 
 | Layer | Teknologi | Catatan |
 | :--- | :--- | :--- |
-| **Mobile Front-end** | Flutter (Dart SDK) | Manajemen UI/UX dan State Management |
-| **Local Database** | IsarDB | Penyimpanan model Buku, Progres, dan Review secara lokal (*offline*) |
 | **Back-end API** | Go (Chi) | Penyedia REST API untuk manajemen data terpusat |
 | **Server Database** | PostgreSQL | Penyimpanan data persisten di tingkat *cloud server* |
-| **HTTP Client** | Dio / Http (Package) | Media komunikasi data dari Flutter menuju Flask API |
 
 ---
 
@@ -36,6 +61,51 @@ Project ini dibuat untuk tugas MobTeam #2 — Backend & Local Database dengan st
 - RESTful API terpusat untuk melayani HTTP Request.
 - Autentikasi keamanan berbasis Token JWT.
 - Penerimaan operasi data jamak (*bulk actions*) via `HTTP POST`.
+
+## Arsitektur Sistem
+ 
+Bookshelf menggunakan arsitektur berlapis di sisi mobile agar antarmuka, database lokal, dan komunikasi ke server memiliki tanggung jawab yang jelas, mengikuti struktur folder `lib/` (`views`, `models`, `services`).
+ 
+```text
+Flutter Mobile App
+├── Presentation Layer
+│   └── views/                # UI Pages & Widgets (Login, Book List, Book Detail, dll)
+│
+├── State Management Layer
+│   └── setState / StatefulWidget pada masing-masing View
+│
+├── Data Source Layer
+│   ├── Local Data Source: IsarDB (models/)
+│   └── Remote Data Source: REST API via Dio (services/)
+│
+└── Sync Layer
+    └── Push perubahan lokal & pull data terbaru dari server
+```
+ 
+```text
+Backend API
+└── Go (Chi) + PostgreSQL
+    ├── internal/   # Logika, autentikasi, database
+    └── sql/        # Skema & migrasi DDL
+```
+ 
+> Catatan: arsitektur di atas mengikuti struktur direktori proyek yang sudah berjalan. Detail pembagian layer pada backend (routes/handlers) bisa dilengkapi lebih lanjut sesuai kode di `backend/internal/`.
+ 
+---
+
+## Alur Offline-First
+ 
+Bookshelf menjadikan **IsarDB sebagai penyimpanan utama di sisi aplikasi mobile**. Data yang ditampilkan ke user berasal dari local database terlebih dahulu, sehingga aplikasi tetap responsif walau tanpa koneksi internet.
+ 
+Alur utamanya:
+ 
+1. User menambah, mengedit, atau menghapus data buku melalui aplikasi.
+2. Perubahan disimpan terlebih dahulu ke IsarDB secara lokal.
+3. Saat koneksi internet tersedia kembali, user dapat menekan tombol "Sinkronisasi" pada halaman Profile.
+4. Aplikasi akan mengirim perubahan lokal ke backend dan menarik data terbaru dari server untuk disimpan kembali ke IsarDB.
+> Catatan: fitur penandaan status sinkronisasi per-item (mis. status `pending`/`synced` pada tiap data) masih dalam tahap pengembangan dan belum stabil sepenuhnya.
+ 
+---
 
 ## Struktur Direktori Proyek (Monorepo)
 Untuk menjaga modularitas, repositori ini menggunakan arsitektur monorepo yang memisahkan kode aplikasi mobile dengan server backend:
@@ -101,11 +171,43 @@ Ikuti langkah-langkah berikut untuk menginstal aplikasi **Bookshelf** pada peran
 ---
 
 ## Menjalankan Aplikasi dengan Flutter
-```text
+ 
+### Prasyarat
+Pastikan sudah menginstall:
+- Flutter SDK (`^3.11.0`)
+- Dart SDK
+- Android Studio & Android SDK
+- Android Emulator atau device Android fisik
+Cek environment Flutter:
+```bash
+flutter doctor -v
+```
+ 
+### Install dependency
+```bash
 flutter pub get
+```
+ 
+### Generate file Isar
+Karena Bookshelf memakai `isar_generator` dan `build_runner` untuk model database lokal, jalankan:
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+ 
+### Jalankan aplikasi
+```bash
 flutter run
 ```
 Note: Jika ingin menggunakan REST API yang dijalankan secara lokal, ganti `_baseUrl` pada file `apps\mobile\lib\services\api_service.dart`. Misal `_baseUrl = 'localhost/api/v1`
+ 
+### Build APK
+```bash
+flutter build apk --release
+```
+Hasil build APK release berada di:
+```text
+main/app-arm64-v8a-release.apk
+```
 
 --- 
 
